@@ -1,25 +1,43 @@
 from flask import Flask, redirect, render_template, request, flash, url_for, make_response
 import models
 import db_init
+import logging
+import os
+
+
+if os.path.exists('debug.log'):
+    log = logging.basicConfig(filename='debug.log',
+                              filemode='w',
+                              level=logging.DEBUG,
+                              format='%(asctime)s [%(levelname)s] - %(message)s',
+                              datefmt='%H:%M:%S')
+else:
+    log = logging.basicConfig(filename='debug.log',
+                              filemode='a',
+                              level=logging.DEBUG,
+                              format='%(asctime)s [%(levelname)s] - %(message)s',
+                              datefmt='%H:%M:%S')
 
 
 app = Flask(__name__)
+app.secret_key = "super secret key"
 
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
-    conn = models.db_connect()
 
     if request.method == 'POST':
         url = request.form['url']
 
         if not url:
-            flash('The URL is required!')
+            flash('Поле URL порожнє!')
+            return redirect(url_for('index'))
+        elif not models.is_valid_url(url):
+            flash('Не коректно введене полисання!')
             return redirect(url_for('index'))
 
         hashid = models.short_link_create(url)
         short_url = request.host_url + hashid
-
         return render_template('index.html', short_url=short_url)
 
     return render_template('index.html')

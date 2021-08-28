@@ -20,7 +20,7 @@ def initialize_db():
         conn.close()
         print('Created DB!')
     else:
-        print('Operation aborted. DB exists!')
+        print('DB exists!')
 
 
 if __name__ == '__main__':
